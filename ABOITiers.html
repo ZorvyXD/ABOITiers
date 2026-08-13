@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ABOITiers - Rankings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --bg-card: #12161f;
+      --bg-elevated: #1a1f2b;
+      --border: #252b3a;
+      --text: #e6e9f0;
+      --text-muted: #8b93a7;
+      --primary: #5b8def;
+      --primary-hover: #4a7de0;
+      --danger: #e05c5c;
+      --danger-hover: #c94a4a;
+      --success: #3ecf8e;
+      --ht1: #ffd700;
+      --ht2: #ff9f43;
+      --ht3: #54a0ff;
+      --ht4: #5f27cd;
+      --ht5: #01a3a4;
+      --lt1: #feca57;
+      --lt2: #ff9ff3;
+      --lt3: #48dbfb;
+      --lt4: #c8d6e5;
+      --lt5: #8395a7;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    .navbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 32px; background: rgba(18,22,31,0.95);
+      border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .nav-left { display: flex; align-items: center; gap: 32px; }
+    .logo {
+      font-size: 1.5rem; font-weight: 800; text-decoration: none; color: var(--text);
+    }
+    .logo span {
+      background: linear-gradient(135deg, #5b8def, #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .nav-links { display: flex; gap: 8px; }
+    .nav-link {
+      display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px;
+      color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500;
+      transition: all 0.15s;
+    }
+    .nav-link:hover, .nav-link.active { background: var(--bg-elevated); color: var(--text); }
+    .search-box { position: relative; }
+    .search-box input {
+      background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px;
+      padding: 9px 14px 9px 38px; color: var(--text); font-size: 0.9rem; width: 220px; outline: none;
+    }
+    .search-box input:focus { border-color: var(--primary); }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.6; }
+    .tabs-container {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 32px 0; flex-wrap: wrap; gap: 12px;
+    }
+    .tabs {
+      display: flex; gap: 6px; flex-wrap: wrap; background: var(--bg-card);
+      padding: 6px; border-radius: 12px; border: 1px solid var(--border);
+    }
+    .tab {
+      background: transparent; border: none; color: var(--text-muted);
+      padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .tab:hover { color: var(--text); background: var(--bg-elevated); }
+    .tab.active { background: var(--primary); color: white; }
+    .server-info { display: flex; align-items: center; gap: 12px; }
+    .info-badge {
+      background: var(--bg-elevated); border: 1px solid var(--border);
+      padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; color: var(--text-muted);
+    }
+    .server-ip { font-size: 0.85rem; color: var(--text-muted); }
+    .server-ip strong { color: var(--text); }
+    .rankings-section { padding: 24px 32px 40px; }
+    .table-wrapper {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+    }
+    .leaderboard { width: 100%; border-collapse: collapse; }
+    .leaderboard th {
+      text-align: left; padding: 16px 20px; font-size: 0.75rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border); background: var(--bg-elevated);
+    }
+    .leaderboard td { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+    .leaderboard tr:last-child td { border-bottom: none; }
+    .leaderboard tr:hover td { background: rgba(91,141,239,0.04); }
+    .rank-num { font-weight: 700; color: var(--text-muted); width: 50px; }
+    .rank-num.top1 { color: #ffd700; }
+    .rank-num.top2 { color: #c0c0c0; }
+    .rank-num.top3 { color: #cd7f32; }
+    .player-cell { display: flex; align-items: center; gap: 12px; }
+    .player-avatar {
+      width: 36px; height: 36px; border-radius: 8px; background: var(--bg-elevated);
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .player-name { font-weight: 600; }
+    .region-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem;
+      font-weight: 600; background: var(--bg-elevated); color: var(--text-muted);
+    }
+    .tiers-cell { display: flex; flex-wrap: wrap; gap: 5px; }
+    .tier-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.3px; min-width: 42px;
+    }
+    .tier-HT1 { background: rgba(255,215,0,0.18); color: var(--ht1); border: 1px solid rgba(255,215,0,0.35); }
+    .tier-HT2 { background: rgba(255,159,67,0.18); color: var(--ht2); border: 1px solid rgba(255,159,67,0.35); }
+    .tier-HT3 { background: rgba(84,160,255,0.18); color: var(--ht3); border: 1px solid rgba(84,160,255,0.35); }
+    .tier-HT4 { background: rgba(95,39,205,0.18); color: var(--ht4); border: 1px solid rgba(95,39,205,0.35); }
+    .tier-HT5 { background: rgba(1,163,164,0.18); color: var(--ht5); border: 1px solid rgba(1,163,164,0.35); }
+    .tier-LT1 { background: rgba(254,202,87,0.18); color: var(--lt1); border: 1px solid rgba(254,202,87,0.35); }
+    .tier-LT2 { background: rgba(255,159,243,0.18); color: var(--lt2); border: 1px solid rgba(255,159,243,0.35); }
+    .tier-LT3 { background: rgba(72,219,251,0.18); color: var(--lt3); border: 1px solid rgba(72,219,251,0.35); }
+    .tier-LT4 { background: rgba(200,214,229,0.15); color: var(--lt4); border: 1px solid rgba(200,214,229,0.3); }
+    .tier-LT5 { background: rgba(131,149,167,0.15); color: var(--lt5); border: 1px solid rgba(131,149,167,0.3); }
+    .points { font-weight: 600; color: var(--text-muted); }
+    .queue-section { padding: 0 32px 40px; }
+    .queue-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 28px; max-width: 560px;
+    }
+    .queue-card h2 { font-size: 1.35rem; margin-bottom: 6px; }
+    .queue-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+    .queue-status { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-weight: 600; }
+    .status-dot {
+      width: 10px; height: 10px; border-radius: 50%; background: var(--success);
+      box-shadow: 0 0 8px var(--success); animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .queue-list {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px; min-height: 180px; margin-bottom: 20px;
+    }
+    .empty-queue { color: var(--text-muted); text-align: center; padding: 40px 0; font-size: 0.9rem; }
+    .queue-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; background: var(--bg-elevated); border-radius: 8px; margin-bottom: 6px;
+    }
+    .queue-item:last-child { margin-bottom: 0; }
+    .queue-pos { font-weight: 700; color: var(--primary); width: 28px; }
+    .queue-name { font-weight: 600; flex: 1; }
+    .queue-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .queue-actions input {
+      flex: 1; min-width: 140px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 14px; color: var(--text); font-size: 0.95rem; outline: none;
+    }
+    .queue-actions input:focus { border-color: var(--primary); }
+    .queue-message { margin-top: 12px; font-size: 0.9rem; min-height: 20px; }
+    .queue-message.error { color: var(--danger); }
+    .queue-message.success { color: var(--success); }
+    .btn {
+      border: none; border-radius: 10px; padding: 11px 18px; font-size: 0.9rem;
+      font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: var(--danger-hover); }
+    .btn-secondary { background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .admin-section { padding: 0 32px 40px; }
+    .admin-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 28px; max-width: 640px;
+    }
+    .admin-card h2 { font-size: 1.35rem; margin-bottom: 12px; }
+    .admin-card h3 { font-size: 1.05rem; margin-bottom: 10px; color: var(--text-muted); }
+    .auth-row, .webhook-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    .auth-row input, .webhook-row input {
+      flex: 1; min-width: 200px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 14px; color: var(--text); font-size: 0.95rem; outline: none;
+    }
+    .auth-row input:focus, .webhook-row input:focus { border-color: var(--primary); }
+    .auth-message { margin-top: 10px; font-size: 0.9rem; min-height: 20px; }
+    .auth-message.error { color: var(--danger); }
+    .auth-message.success { color: var(--success); }
+    .admin-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .hint { margin-top: 14px; font-size: 0.85rem; color: var(--text-muted); }
+    footer {
+      text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+    @media (max-width: 768px) {
+      .navbar { flex-direction: column; gap: 12px; padding: 12px 16px; }
+      .nav-left { flex-direction: column; gap: 12px; width: 100%; }
+      .search-box input { width: 100%; }
+      .tabs-container { padding: 16px 16px 0; }
+      .rankings-section, .queue-section, .admin-section { padding-left: 16px; padding-right: 16px; }
+      .leaderboard th, .leaderboard td { padding: 12px 10px; font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-left">
+      <a href="#" class="logo">ABOI<span>Tiers</span></a>
+      <div class="nav-links">
+        <a href="#" class="nav-link active">🏠 Home</a>
+        <a href="#rankings" class="nav-link">🏆 Rankings</a>
+        <a href="#queue" class="nav-link">📋 Queue</a>
+        <a href="#admin" class="nav-link" id="admin-nav" style="display:none;">⚙️ Admin</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="search-box">
+        <input type="text" id="player-search" placeholder="Search player..." />
+        <span class="search-icon">🔍</span>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="tabs-container">
+      <div class="tabs">
+        <button class="tab active" data-mode="overall">🏆 Overall</button>
+        <button class="tab" data-mode="vanilla">⚔️ Vanilla</button>
+        <button class="tab" data-mode="uhc">❤️ UHC</button>
+        <button class="tab" data-mode="pot">🧪 Pot</button>
+        <button class="tab" data-mode="nethop">🟢 NethOP</button>
+        <button class="tab" data-mode="smp">🛡️ SMP</button>
+        <button class="tab" data-mode="sword">🗡️ Sword</button>
+        <button class="tab" data-mode="axe">🪓 Axe</button>
+        <button class="tab" data-mode="mace">🔨 Mace</button>
+      </div>
+      <div class="server-info">
+        <span class="info-badge">ℹ️ Information</span>
+        <span class="server-ip">SERVER IP: <strong>aboi.club</strong></span>
+      </div>
+    </div>
+
+    <section id="rankings" class="rankings-section">
+      <div class="table-wrapper">
+        <table class="leaderboard">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>PLAYER</th>
+              <th>REGION</th>
+              <th>TIERS</th>
+              <th>POINTS</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="queue" class="queue-section">
+      <div class="queue-card">
+        <h2>📋 Testing Queue</h2>
+        <p class="queue-desc">Max 5 players. Updates every 10 seconds. Join to get tier tested!</p>
+        <div class="queue-status">
+          <span class="status-dot"></span>
+          <span id="queue-count">0 / 5</span> in queue
+        </div>
+        <div class="queue-list" id="queue-list">
+          <div class="empty-queue">Queue is empty. Be the first!</div>
+        </div>
+        <div class="queue-actions">
+          <input type="text" id="queue-ign" placeholder="Your Minecraft IGN" maxlength="16" />
+          <button id="join-queue-btn" class="btn btn-primary">Join Queue</button>
+          <button id="leave-queue-btn" class="btn btn-danger" style="display:none;">Leave Queue</button>
+        </div>
+        <p id="queue-message" class="queue-message"></p>
+      </div>
+    </section>
+
+    <section id="admin" class="admin-section" style="display:none;">
+      <div class="admin-card">
+        <h2>⚙️ Admin Panel (Zorvy only)</h2>
+        <div id="auth-section">
+          <p>Paste a GitHub Personal Access Token belonging to the account <strong>Zorvy</strong> to unlock admin features.</p>
+          <div class="auth-row">
+            <input type="password" id="ghp-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" />
+            <button id="verify-ghp-btn" class="btn btn-primary">Verify Token</button>
+          </div>
+          <p id="auth-message" class="auth-message"></p>
+        </div>
+        <div id="admin-controls" style="display:none;">
+          <h3>Discord Webhook</h3>
+          <div class="webhook-row">
+            <input type="text" id="webhook-url" placeholder="https://discord.com/api/webhooks/..." />
+            <button id="save-webhook-btn" class="btn btn-primary">Save Webhook</button>
+          </div>
+          <p id="webhook-message" class="auth-message"></p>
+          <h3 style="margin-top:24px;">Queue Controls</h3>
+          <div class="admin-actions">
+            <button id="clear-queue-btn" class="btn btn-danger">Clear Entire Queue</button>
+            <button id="force-update-btn" class="btn btn-secondary">Force Discord Update</button>
+          </div>
+          <p class="hint">Queue automatically posts to Discord every 10 seconds when a webhook is set.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 ABOITiers • Made for the community • Hosted on GitHub Pages</p>
+  </footer>
+
+  <script>
+    // Safe storage that works even when localStorage is blocked (sandbox)
+    const storage = (function () {
+      let memory = {};
+      try {
+        const test = "__storage_test__";
+        localStorage.setItem(test, test);
+        localStorage.removeItem(test);
+        return localStorage;
+      } catch (e) {
+        return {
+          getItem: (k) => memory[k] || null,
+          setItem: (k, v) => { memory[k] = String(v); },
+          removeItem: (k) => { delete memory[k]; }
+        };
+      }
+    })();
+
+    const MAX_QUEUE = 5;
+    const UPDATE_INTERVAL = 10000;
+
+    const TIER_POINTS = {
+      HT1: 60, HT2: 30, HT3: 10, HT4: 4, HT5: 2,
+      LT1: 45, LT2: 20, LT3: 6,  LT4: 3, LT5: 1
+    };
+
+    const PLAYERS = [
+      { name: "Zorvy", region: "NA", tiers: { overall:"HT1", vanilla:"HT1", uhc:"HT2", pot:"HT1", nethop:"LT1", smp:"HT2", sword:"HT1", axe:"HT2", mace:"LT1" } },
+      { name: "AboiGod", region: "EU", tiers: { overall:"HT1", vanilla:"HT2", uhc:"HT1", pot:"LT1", nethop:"HT2", smp:"HT1", sword:"HT2", axe:"LT1", mace:"HT3" } },
+      { name: "CrimsonBlade", region: "AS", tiers: { overall:"HT2", vanilla:"HT2", uhc:"LT1", pot:"HT3", nethop:"HT2", smp:"LT2", sword:"HT1", axe:"HT3", mace:"LT2" } },
+      { name: "NetherKing", region: "EU", tiers: { overall:"HT2", vanilla:"LT1", uhc:"HT3", pot:"HT2", nethop:"HT1", smp:"HT3", sword:"LT1", axe:"HT2", mace:"HT4" } },
+      { name: "PotMaster99", region: "NA", tiers: { overall:"HT3", vanilla:"HT3", uhc:"LT2", pot:"HT1", nethop:"LT1", smp:"HT4", sword:"HT3", axe:"LT2", mace:"HT3" } },
+      { name: "SwordLegend", region: "EU", tiers: { overall:"HT3", vanilla:"LT2", uhc:"HT4", pot:"LT3", nethop:"HT3", smp:"LT1", sword:"HT1", axe:"HT4", mace:"LT3" } },
+      { name: "AxeWarrior", region: "AS", tiers: { overall:"LT1", vanilla:"HT4", uhc:"LT1", pot:"HT4", nethop:"LT2", smp:"HT2", sword:"LT2", axe:"HT1", mace:"HT5" } },
+      { name: "MaceDemon", region: "NA", tiers: { overall:"LT1", vanilla:"LT3", uhc:"HT5", pot:"LT2", nethop:"HT4", smp:"LT3", sword:"HT4", axe:"LT1", mace:"HT1" } },
+      { name: "UHCPro", region: "EU", tiers: { overall:"LT2", vanilla:"HT5", uhc:"HT1", pot:"LT4", nethop:"LT3", smp:"HT5", sword:"LT3", axe:"HT5", mace:"LT2" } },
+      { name: "SMPChamp", region: "OCE", tiers: { overall:"LT2", vanilla:"LT4", uhc:"LT2", pot:"HT5", nethop:"HT5", smp:"HT1", sword:"LT4", axe:"LT3", mace:"HT4" } },
+      { name: "VanillaAce", region: "NA", tiers: { overall:"LT3", vanilla:"HT1", uhc:"LT3", pot:"LT5", nethop:"LT4", smp:"LT2", sword:"HT5", axe:"LT4", mace:"LT1" } },
+      { name: "RisingStar", region: "EU", tiers: { overall:"LT3", vanilla:"LT5", uhc:"LT4", pot:"LT1", nethop:"LT5", smp:"LT4", sword:"LT5", axe:"LT5", mace:"LT5" } },
+      { name: "NewChallenger", region: "AS", tiers: { overall:"LT4", vanilla:"LT4", uhc:"LT5", pot:"LT4", nethop:"LT3", smp:"LT5", sword:"LT3", axe:"LT2", mace:"LT4" } },
+      { name: "PracticeBot", region: "NA", tiers: { overall:"LT4", vanilla:"LT5", uhc:"LT5", pot:"LT5", nethop:"LT5", smp:"LT5", sword:"LT5", axe:"LT5", mace:"LT3" } },
+      { name: "RookiePlayer", region: "EU", tiers: { overall:"LT5", vanilla:"LT5", uhc:"LT5", pot:"LT5", nethop:"LT5", smp:"LT5", sword:"LT5", axe:"LT5", mace:"LT5" } }
+    ];
+
+    PLAYERS.forEach(p => {
+      let total = 0;
+      for (const mode in p.tiers) {
+        if (mode === "overall") continue;
+        if (TIER_POINTS[p.tiers[mode]]) total += TIER_POINTS[p.tiers[mode]];
+      }
+      p.points = total;
+    });
+    PLAYERS.sort((a, b) => b.points - a.points);
+
+    let currentMode = "overall";
+    let queue = [];
+    try { queue = JSON.parse(storage.getItem("aboi_queue") || "[]"); } catch(e) { queue = []; }
+    let webhookUrl = storage.getItem("aboi_webhook") || "";
+    let myIgn = storage.getItem("aboi_my_ign") || "";
+    let updateTimer = null;
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    function renderLeaderboard(filter = "") {
+      const tbody = document.getElementById("leaderboard-body");
+      const search = filter.toLowerCase().trim();
+      let list = PLAYERS.map((p, i) => ({ ...p, originalRank: i + 1 }));
+      if (search) list = list.filter(p => p.name.toLowerCase().includes(search));
+
+      tbody.innerHTML = list.map((p, idx) => {
+        const rank = search ? idx + 1 : p.originalRank;
+        const rankClass = rank === 1 ? "top1" : rank === 2 ? "top2" : rank === 3 ? "top3" : "";
+        let tierHtml = "";
+        if (currentMode === "overall") {
+          ["vanilla","uhc","pot","nethop","smp","sword","axe","mace"].forEach(m => {
+            const t = p.tiers[m];
+            if (t) tierHtml += `<span class="tier-badge tier-${t}">${t}</span>`;
+          });
+        } else {
+          const t = p.tiers[currentMode] || "N/A";
+          tierHtml = `<span class="tier-badge tier-${t}">${t}</span>`;
+        }
+        return `<tr>
+          <td class="rank-num ${rankClass}">${rank}</td>
+          <td><div class="player-cell"><div class="player-avatar">🧑</div><span class="player-name">${escapeHtml(p.name)}</span></div></td>
+          <td><span class="region-badge">${p.region}</span></td>
+          <td><div class="tiers-cell">${tierHtml}</div></td>
+          <td class="points">${p.points}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    function saveQueue() {
+      try { storage.setItem("aboi_queue", JSON.stringify(queue)); } catch(e) {}
+    }
+
+    function renderQueue() {
+      const listEl = document.getElementById("queue-list");
+      const countEl = document.getElementById("queue-count");
+      const joinBtn = document.getElementById("join-queue-btn");
+      const leaveBtn = document.getElementById("leave-queue-btn");
+      countEl.textContent = `${queue.length} / ${MAX_QUEUE}`;
+      if (queue.length === 0) {
+        listEl.innerHTML = `<div class="empty-queue">Queue is empty. Be the first!</div>`;
+      } else {
+        listEl.innerHTML = queue.map((name, i) => `
+          <div class="queue-item">
+            <span class="queue-pos">#${i+1}</span>
+            <span class="queue-name">${escapeHtml(name)}</span>
+          </div>`).join("");
+      }
+      if (myIgn && queue.includes(myIgn)) {
+        joinBtn.style.display = "none";
+        leaveBtn.style.display = "inline-flex";
+      } else {
+        joinBtn.style.display = "inline-flex";
+        leaveBtn.style.display = "none";
+      }
+    }
+
+    function setQueueMessage(msg, type = "") {
+      const el = document.getElementById("queue-message");
+      el.textContent = msg;
+      el.className = "queue-message " + type;
+    }
+
+    function joinQueue() {
+      const ign = document.getElementById("queue-ign").value.trim();
+      if (!ign) { setQueueMessage("Please enter your Minecraft IGN.", "error"); return; }
+      if (ign.length < 3 || ign.length > 16) { setQueueMessage("IGN must be 3-16 characters.", "error"); return; }
+      if (queue.includes(ign)) { setQueueMessage("You are already in the queue!", "error"); return; }
+      if (queue.length >= MAX_QUEUE) {
+        setQueueMessage("Queue Is Currently Full, Please Try Again later", "error");
+        return;
+      }
+      queue.push(ign);
+      myIgn = ign;
+      try { storage.setItem("aboi_my_ign", myIgn); } catch(e) {}
+      saveQueue();
+      renderQueue();
+      setQueueMessage(`Successfully joined as ${ign}! Position #${queue.length}`, "success");
+      postToDiscord();
+    }
+
+    function leaveQueue() {
+      if (!myIgn) return;
+      const idx = queue.indexOf(myIgn);
+      if (idx === -1) { setQueueMessage("You are not in the queue.", "error"); return; }
+      queue.splice(idx, 1);
+      saveQueue();
+      renderQueue();
+      setQueueMessage("You left the queue.", "success");
+      postToDiscord();
+    }
+
+    function clearQueue() {
+      if (!confirm("Clear the entire queue?")) return;
+      queue = [];
+      saveQueue();
+      renderQueue();
+      setQueueMessage("Queue cleared by admin.", "success");
+      postToDiscord();
+    }
+
+    async function postToDiscord() {
+      if (!webhookUrl) return;
+      const positions = queue.map((name, i) => `**#${i+1}** — \`${name}\``).join("\n") || "_Queue is empty_";
+      const embed = {
+        title: "📋 ABOITiers Testing Queue",
+        description: positions,
+        color: queue.length >= MAX_QUEUE ? 0xe05c5c : 0x5b8def,
+        fields: [
+          {
+            name: "Status",
+            value: queue.length >= MAX_QUEUE
+              ? "🔴 **Queue Is Currently Full, Please Try Again later**"
+              : `🟢 ${queue.length}/${MAX_QUEUE} slots filled`,
+            inline: true
+          },
+          {
+            name: "How to join",
+            value: "Go to the ABOITiers website and use the Join Queue button.",
+            inline: false
+          }
+        ],
+        footer: { text: "Updates every 10 seconds • Max 5 players" },
+        timestamp: new Date().toISOString()
+      };
+      try {
+        await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            embeds: [embed],
+            username: "ABOITiers Queue"
+          })
+        });
+      } catch (err) { console.error("Webhook failed:", err); }
+    }
+
+    function startAutoUpdate() {
+      if (updateTimer) clearInterval(updateTimer);
+      updateTimer = setInterval(() => { if (webhookUrl) postToDiscord(); }, UPDATE_INTERVAL);
+    }
+
+    async function verifyGitHubToken() {
+      const token = document.getElementById("ghp-token").value.trim();
+      const msgEl = document.getElementById("auth-message");
+      if (!token) { msgEl.textContent = "Please paste a token."; msgEl.className = "auth-message error"; return; }
+      msgEl.textContent = "Verifying..."; msgEl.className = "auth-message";
+      try {
+        const res = await fetch("https://api.github.com/user", {
+          headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" }
+        });
+        if (!res.ok) { msgEl.textContent = "Invalid token or rate limited."; msgEl.className = "auth-message error"; return; }
+        const user = await res.json();
+        const login = (user.login || "").toLowerCase();
+        if (login === "zorvy" || login === "zorvyxd") {
+          msgEl.textContent = `✅ Authenticated as ${user.login}. Admin unlocked.`;
+          msgEl.className = "auth-message success";
+          document.getElementById("admin-controls").style.display = "block";
+          document.getElementById("admin-nav").style.display = "flex";
+          document.getElementById("auth-section").style.display = "none";
+        } else {
+          msgEl.textContent = `Token belongs to ${user.login}. Only Zorvy can access admin.`;
+          msgEl.className = "auth-message error";
+        }
+      } catch (err) {
+        msgEl.textContent = "Network error."; msgEl.className = "auth-message error";
+      }
+    }
+
+    function saveWebhook() {
+      const url = document.getElementById("webhook-url").value.trim();
+      if (!url || !url.includes("discord.com/api/webhooks/")) {
+        document.getElementById("webhook-message").textContent = "Invalid Discord webhook URL.";
+        document.getElementById("webhook-message").className = "auth-message error";
+        return;
+      }
+      webhookUrl = url;
+      try { storage.setItem("aboi_webhook", webhookUrl); } catch(e) {}
+      document.getElementById("webhook-message").textContent = "✅ Webhook saved. Queue will post every 10s.";
+      document.getElementById("webhook-message").className = "auth-message success";
+      postToDiscord();
+      startAutoUpdate();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (webhookUrl) {
+        document.getElementById("webhook-url").value = webhookUrl;
+        startAutoUpdate();
+      }
+      if (myIgn) document.getElementById("queue-ign").value = myIgn;
+
+      renderLeaderboard();
+      renderQueue();
+
+      document.querySelectorAll(".tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          currentMode = tab.dataset.mode;
+          renderLeaderboard(document.getElementById("player-search").value);
+        });
+      });
+
+      document.getElementById("player-search").addEventListener("input", e => renderLeaderboard(e.target.value));
+      document.getElementById("join-queue-btn").addEventListener("click", joinQueue);
+      document.getElementById("leave-queue-btn").addEventListener("click", leaveQueue);
+      document.getElementById("verify-ghp-btn").addEventListener("click", verifyGitHubToken);
+      document.getElementById("save-webhook-btn").addEventListener("click", saveWebhook);
+      document.getElementById("clear-queue-btn").addEventListener("click", clearQueue);
+      document.getElementById("force-update-btn").addEventListener("click", () => {
+        postToDiscord();
+        document.getElementById("webhook-message").textContent = "Forced update sent.";
+        document.getElementById("webhook-message").className = "auth-message success";
+      });
+      document.getElementById("admin-nav").addEventListener("click", e => {
+        e.preventDefault();
+        document.getElementById("admin").style.display = "block";
+        document.getElementById("admin").scrollIntoView({ behavior: "smooth" });
+      });
+    });
+  </script>
+</body>
+</html>
